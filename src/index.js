@@ -1,5 +1,5 @@
 const toReadable = function (number) {
-  const dict = new Map([
+  const numbersDict = new Map([
     [0, 'zero'],
     [1, 'one'],
     [2, 'two'],
@@ -29,55 +29,38 @@ const toReadable = function (number) {
     [80, 'eighty'],
     [90, 'ninety']
   ]);
-  const k = 10 ** 3;
-  const m = 10 ** 6;
-  const b = 10 ** 9;
-  const t = 10 ** 12;
-  const func = number => {
-    if (number <= 20) return `${dict.get(number)}`;
+
+  const exponentDict = [
+    {'description': 'hundred', 'exponent': 2, 'limitExp': 3},
+    {'description': 'thousand', 'exponent': 3, 'limitExp': 6},
+    {'description': 'million', 'exponent': 6, 'limitExp': 9},
+    {'description': 'billion', 'exponent': 9, 'limitExp': 12},
+    {'description': 'trillion', 'exponent': 12, 'limitExp': 15},
+  ];
+
+  const intToEn = number => {
+    if (number <= 20) return `${numbersDict.get(number)}`;
 
     if (number < 100) {
-      if (number % 10 === 0) return `${dict.get(number)}`;
+      if (number % 10 === 0) return `${numbersDict.get(number)}`;
 
-      return `${dict.get(Math.floor(number / 10) * 10)} ${dict.get(number % 10)}`;
+      return `${numbersDict.get(Math.floor(number / 10) * 10)} ${numbersDict.get(number % 10)}`;
     }
 
-    if (number < k) {
-      if (number % 100 === 0) return `${dict.get(number / 100)} hundred`;
+    for (let exp of exponentDict) {
+      if (number < 10 ** exp.limitExp) {
+        if (number % 10 ** exp.exponent === 0) {
+          return `${intToEn(number / (10 ** exp.exponent))} ${exp.description}`;
+        }
 
-      return `${dict.get(Math.floor(number / 100))} hundred ${func(number % 100)}`;
-    }
-
-    if (number < m) {
-
-      if (number % k === 0) return `${func(number / k)} thousand`;
-
-      return `${func(Math.floor(number / k))} thousand ${func(number % k)}`;
-    }
-
-    if (number < b) {
-      if (number % m === 0) return `${func(number / m)} million`;
-
-      return `${func(Math.floor(number / m))} million ${func(number % m)}`;
-    }
-
-    if (number < t) {
-      if (number % b === 0) return `${func(number / b)} billion`;
-
-      return `${func(Math.floor(number / b))} billion ${func(number % b)}`;
-    }
-
-    if (number < t * 1000) {
-      if (number % t === 0) return `${func(number / t)} trillion`;
-
-      return `${func(Math.floor(number / t))} trillion ${func(number % t)}`;
+        return `${intToEn(Math.floor(number / (10 ** exp.exponent)))} ${exp.description} ${intToEn(number % (10 ** exp.exponent))}`;
+      }
     }
 
     return `${number} is too difficult for me`;
   };
 
-/*  console.log(func(number));*/
-  return func(number);
+  return intToEn(number);
 }
 
 module.exports = toReadable;
